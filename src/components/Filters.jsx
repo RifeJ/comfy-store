@@ -1,119 +1,110 @@
-import React from "react";
+import { useForm } from "react-hook-form";
 
-const orderOptions = ["a-z", "z-a", "high", "low"];
+const Filters = ({
+  categories,
+  companies,
+  initialFilters,
+  fetchProducts,
+  onReset,
+}) => {
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: initialFilters,
+  });
 
-const Filters = ({ filters, setFilters, categories, companies, onReset }) => {
-  // THE MAGIC FUNCTION: Handles text, select, range, and checkbox
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const onSubmit = (data) => {
+    fetchProducts(data);
+  };
 
-    setFilters((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? (checked ? "on" : "") : value,
-      page: "1", 
-    }));
+  const handleReset = () => {
+    reset(initialFilters);
+    onReset();
   };
 
   return (
-    <form className="bg-base-200 rounded-md px-8 py-4 grid gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-center">
-      {/* SEARCH */}
-      <div className="flex flex-col">
-        <label className="label-text">Search Product</label>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="bg-base-200 rounded-md px-8 py-4 grid gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-center">
+      {/* 1. ПОИСК */}
+      <div className="form-control">
+        <label className="label-text capitalize">search product</label>
         <input
-          name="search"
-          type="text"
+          {...register("search")}
+          type="search"
           className="input input-bordered input-sm"
-          value={filters.search}
-          onChange={handleChange}
         />
       </div>
 
-      {/* CATEGORY */}
-      <div className="flex flex-col">
-        <label className="label-text">Select Category</label>
+      {/* 2. КАТЕГОРИИ */}
+      <div className="form-control">
+        <label className="label-text capitalize">select category</label>
         <select
-          name="category"
-          className="select select-bordered select-sm"
-          value={filters.category}
-          onChange={handleChange}>
+          {...register("category")}
+          className="select select-bordered select-sm">
           {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
+            <option key={cat}>{cat}</option>
           ))}
         </select>
       </div>
 
-      {/* COMPANY */}
-      <div className="flex flex-col">
-        <label className="label-text">Select Company</label>
+      {/* 3. КОМПАНИИ (Новое!) */}
+      <div className="form-control">
+        <label className="label-text capitalize">select company</label>
         <select
-          name="company"
-          className="select select-bordered select-sm"
-          value={filters.company}
-          onChange={handleChange}>
+          {...register("company")}
+          className="select select-bordered select-sm">
           {companies.map((com) => (
-            <option key={com} value={com}>
-              {com}
-            </option>
+            <option key={com}>{com}</option>
           ))}
         </select>
       </div>
 
-      {/* ORDER */}
-      <div className="flex flex-col">
-        <label className="label-text">Sort By</label>
+      {/* 4. СОРТИРОВКА (Новое!) */}
+      <div className="form-control">
+        <label className="label-text capitalize">sort by</label>
         <select
-          name="order"
-          className="select select-bordered select-sm"
-          value={filters.order}
-          onChange={handleChange}>
-          {orderOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
+          {...register("order")}
+          className="select select-bordered select-sm">
+          <option value="a-z">a-z</option>
+          <option value="z-a">z-a</option>
+          <option value="high">high</option>
+          <option value="low">low</option>
         </select>
       </div>
 
-      {/* PRICE */}
-      <div className="flex flex-col">
-        <label className="label flex justify-between">
-          <span>Price</span>
-          <span>${filters.price / 100}</span>
-        </label>
+      {/* 5. ЦЕНА (Рендж-инпут) */}
+      <div className="form-control">
+        <label className="label-text capitalize">select price</label>
         <input
-          name="price"
+          {...register("price")}
           type="range"
           min={0}
           max={100000}
-          value={filters.price}
-          onChange={handleChange}
+          step={1000}
           className="range range-primary range-sm"
         />
       </div>
 
-      {/* SHIPPING */}
-      <div className="flex flex-col items-center">
-        <label className="label-text">Free Shipping</label>
+      {/* 6. ДОСТАВКА */}
+      <div className="form-control items-center justify-between">
+        <label className="label-text capitalize cursor-pointer">
+          free shipping
+        </label>
         <input
-          name="shipping"
+          {...register("shipping")}
           type="checkbox"
-          className="checkbox checkbox-primary checkbox-sm"
-          checked={filters.shipping === "on"}
-          onChange={handleChange}
+          className="checkbox checkbox-primary checkbox-sm ml-3"
         />
       </div>
 
-      {/* BUTTONS */}
-      <button type="submit" className="btn btn-primary btn-sm uppercase">
-        Search
+      {/* КНОПКИ */}
+      <button type="submit" className="btn btn-primary btn-sm">
+        <p className="uppercase text-[14px] font-semibold">search</p>
       </button>
       <button
         type="button"
-        onClick={onReset}
-        className="btn btn-accent btn-sm uppercase text-base-100">
-        Reset
+        onClick={handleReset}
+        className="btn btn-accent btn-sm">
+        <p className="uppercase text-[14px] font-semibold">reset</p>
       </button>
     </form>
   );

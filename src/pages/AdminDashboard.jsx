@@ -1,0 +1,367 @@
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router";
+import {
+  HiOutlineCube,
+  HiOutlineUsers,
+  HiOutlineShoppingBag,
+  HiOutlineArrowLeft,
+} from "react-icons/hi2";
+
+import { ProductContex2 } from "../utils/ProductContex2";
+
+import { toast } from "react-toastify";
+
+const Typewriter = ({ text, speed = 100 }) => {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    setDisplayedText("");
+    const typingInterval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText((prev) => prev + text.charAt(i));
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, speed);
+    return () => clearInterval(typingInterval);
+  }, [text, speed]);
+
+  return (
+    <h1 className="text-[#FF69B4] font-mono text-2xl tracking-[0.2em] uppercase">
+      {displayedText}
+      <span className="animate-pulse">_</span>
+    </h1>
+  );
+};
+
+const AdminDashboard = () => {
+  const { data, loading } = ProductContex2(
+    "http://localhost:5000/api/products",
+  );
+
+  const [items, setItems] = useState([]);
+  const [terminatingId, setTerminatingId] = useState(null);
+
+  useEffect(() => {
+    if (data) setItems(data);
+  }, [data]);
+
+  const [newProduct, setNewProduct] = useState({ title: "", price: "" });
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+
+    // Собираем данные в формате Strapi
+    const payload = {
+      data: {
+        ...newProduct,
+        price: Number(newProduct.price), // Важно: число
+        featured: Boolean(newProduct.featured),
+        shipping: Boolean(newProduct.shipping),
+        // Если colors — это строка из инпута (напр. "#fff, #000"), превращаем в массив
+        colors:
+          typeof newProduct.colors === "string"
+            ? newProduct.colors.split(",").map((c) => c.trim())
+            : newProduct.colors,
+      },
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // ПРИЕМ ДАННЫХ: добавляем результат в стейт
+        setItems((prevItems) => [...prevItems, result.data]);
+
+        // Очистка формы
+        setNewProduct({
+          title: "",
+          price: "",
+          company: "",
+          description: "",
+          category: "",
+          image: "",
+          featured: false,
+          shipping: false,
+          colors: [],
+        });
+
+        console.log("SUCCESS: UNIT_SYNCED_WITH_GRID");
+        toast.success("SUCCESS: UNIT_SYNCED_WITH_GRID");
+      } else {
+        console.error("REJECTED:", result.error);
+      }
+    } catch (err) {
+      console.error("CONNECTION_LOST:", err);
+    }
+  };
+
+  const handleTerminate = async (id) => {
+    try {
+      // 1. Отправляем запрос на удаление в API
+      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // 2. Если в базе удалено успешно, запускаем анимацию
+        setTerminatingId(id);
+        // 3. Ждем завершения анимации (600ms) и убираем из стейта
+        setTimeout(() => {
+          setItems((prev) => prev.filter((item) => item.id !== id));
+          setTerminatingId(null);
+        }, 600);
+
+        console.log(`UNIT_${id}: TERMINATED_SUCCESSFULLY`);
+      } else {
+        // Если сервер выдал ошибку (например, 403 или 500)
+        alert("ACCESS_DENIED: DATABASE_REJECTED_COMMAND");
+      }
+    } catch (error) {
+      console.error("UPLINK_ERROR:", error);
+      alert("SYSTEM_ERROR: COULD_NOT_REACH_DATABASE");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-[#FF69B4] font-mono animate-pulse">
+        &gt; CONNECTING_TO_CORE_DATABASE...
+      </div>
+    );
+
+  return (
+    <div className="relative flex min-h-screen bg-[#0a0a0a] text-slate-300 font-mono overflow-hidden">
+      {/* 1. CRT SCANLINE EFFECT (Overlay) */}
+      <div className="pointer-events-none absolute inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-size-[100%_4px,3px_100%] opacity-50"></div>
+
+      {/* 2. SIDEBAR */}
+      <aside className="w-64 border-r border-[#FF69B4]/20 bg-[#0f0f0f] p-6 flex flex-col z-10">
+        <div className="mb-10 text-[#FF69B4] font-bold text-xl tracking-tighter border-b border-[#FF69B4]/20 pb-4">
+          CORE_OS v1.0
+        </div>
+
+        <nav className="flex-1 space-y-4">
+          <button className="flex items-center gap-3 text-[#FF69B4] w-full p-2 bg-[#FF69B4]/10 rounded border-l-2 border-[#FF69B4]">
+            <HiOutlineCube /> PRODUCTS
+          </button>
+          <button className="flex items-center gap-3 hover:text-[#FF69B4] w-full p-2 transition-colors">
+            <HiOutlineUsers /> CUSTOMERS
+          </button>
+          <button className="flex items-center gap-3 hover:text-[#FF69B4] w-full p-2 transition-colors">
+            <HiOutlineShoppingBag /> ORDERS
+          </button>
+        </nav>
+
+        {/* LOGOUT / EXIT */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-xs text-slate-500 hover:text-white transition-colors mt-auto pt-4">
+          <HiOutlineArrowLeft /> EXIT_TERMINAL
+        </Link>
+      </aside>
+
+      {/* 3. MAIN CONTENT */}
+      <main className="flex-1 p-10 overflow-y-auto z-10 relative">
+        {/* SYSTEM HEADER */}
+        <header className="mb-10">
+          <Typewriter text="SYSTEM_OVERVIEW_v2.0" speed={70} />
+          <div className="h-1 w-20 bg-[#FF69B4] mt-2 shadow-[0_0_10px_#FF69B4]"></div>
+
+          {/* STATS GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="border border-[#FF69B4]/30 bg-[#FF69B4]/5 p-4 rounded-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#FF69B4]"></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-widest">
+                Total_Assets
+              </div>
+              <div className="text-2xl font-bold text-white mt-1">
+                {items.length}{" "}
+                <span className="text-xs text-[#FF69B4]">UNITS</span>
+              </div>
+            </div>
+
+            <div className="border border-blue-500/30 bg-blue-500/5 p-4 rounded-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-widest">
+                Link_Status
+              </div>
+              <div className="text-2xl font-bold text-white mt-1">ACTIVE</div>
+            </div>
+
+            <div className="border border-green-500/30 bg-green-500/5 p-4 rounded-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-widest">
+                System_Health
+              </div>
+              <div className="text-2xl font-bold text-white mt-1">98%</div>
+            </div>
+          </div>
+        </header>
+
+        {/* LIVE GRAPH (Visualizer) */}
+        <div className="mb-6 flex items-end gap-1 h-10 px-2 border-b border-slate-800">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="w-full bg-[#FF69B4]/20"
+              style={{
+                height: `${Math.floor(Math.random() * 80) + 20}%`,
+                animation: `pulse-bar ${0.5 + Math.random()}s infinite alternate`,
+              }}></div>
+          ))}
+        </div>
+
+        {/* INVENTORY TABLE */}
+        <div className="bg-[#111]/80 border border-slate-800 p-6 rounded-lg backdrop-blur-sm">
+          <h2 className="text-[#FF69B4] font-bold mb-6 flex items-center gap-2 uppercase tracking-tighter">
+            <span className="w-2 h-2 bg-[#FF69B4] rounded-full animate-ping"></span>
+            Active_Inventory_Stream
+          </h2>
+          <div className="mb-10 p-6 border border-[#FF69B4]/20 bg-[#111]/50 backdrop-blur-md">
+            <h3 className="text-[#FF69B4] text-xs mb-4 tracking-[0.3em] font-bold">
+              &gt; INITIALIZE_NEW_UNIT
+            </h3>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Основное */}
+                <input
+                  placeholder="TITLE"
+                  className="admin-input" // твой стиль из CSS
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, title: e.target.value })
+                  }
+                />
+                <input
+                  placeholder="PRICE"
+                  type="number"
+                  className="admin-input text-[#FF69B4]"
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, price: e.target.value })
+                  }
+                />
+
+                {/* Категория и Бренд */}
+                <input
+                  placeholder="CATEGORY"
+                  className="admin-input"
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, category: e.target.value })
+                  }
+                />
+                <input
+                  placeholder="COMPANY"
+                  className="admin-input"
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, company: e.target.value })
+                  }
+                />
+                <input
+                  placeholder="IMAGE_URL"
+                  className="admin-input w-full"
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, image: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="COLORS (e.g. #ff0000, #000000)"
+                  className="admin-input"
+                  onChange={(e) => {
+                    const colorsArray = e.target.value
+                      .split(",")
+                      .map((color) => color.trim());
+                    setNewProduct({ ...newProduct, colors: colorsArray });
+                  }}
+                />
+              </div>
+
+              {/* Переключатели (Checkbox) */}
+              <div className="flex gap-10 text-[10px] tracking-widest text-slate-500">
+                <label className="flex items-center gap-2 cursor-pointer hover:text-[#FF69B4]">
+                  <input
+                    type="checkbox"
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        featured: e.target.checked,
+                      })
+                    }
+                  />
+                  FEATURED_UNIT
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer hover:text-[#FF69B4]">
+                  <input
+                    type="checkbox"
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        shipping: e.target.checked,
+                      })
+                    }
+                  />
+                  FREE_SHIPPING
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 border border-[#FF69B4] text-[#FF69B4] hover:bg-[#FF69B4] hover:text-black transition-all uppercase font-bold">
+                EXECUTE_DATA_INJECTION
+              </button>
+            </form>
+          </div>
+
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-500 text-[10px] tracking-widest uppercase">
+                <th className="py-3 px-4">UID</th>
+                <th className="py-3 px-4">Model_Name</th>
+                <th className="py-3 px-4">Price_Credits</th>
+                <th className="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr
+                  key={item.id}
+                  className={`border-b border-slate-900 transition-all ${
+                    terminatingId === item.id
+                      ? "animate-terminate"
+                      : "hover:bg-[#FF69B4]/5"
+                  }`}>
+                  <td className="py-4 px-4 font-mono text-slate-500 text-xs">
+                    #{item.id}
+                  </td>
+                  <td className="py-4 px-4 font-bold text-white uppercase">
+                    {item.attributes?.title || item.title || "Unknown_Unit"}
+                  </td>
+                  <td className="py-4 px-4 text-[#FF69B4] font-mono">
+                    ${item.attributes?.price || item.price}
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <button
+                      onClick={() => handleTerminate(item.id)}
+                      className="text-red-500 hover:text-white hover:bg-red-600 px-3 py-1 text-[10px] border border-red-900 transition-all font-bold">
+                      [ TERMINATE ]
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard;

@@ -1,20 +1,55 @@
-import React from "react";
-import { Link } from "react-router";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 
 function Header() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("jwt");
+    setUser(null);
+    window.location.reload(); // Refresh the page to update the UI
+  };
+
   return (
     <div className="bg-neutral text-neutral-content">
       <div className="flex gap-x-6 justify-end items-center py-2 px-8 mx-auto max-w-6xl">
-        <Link to={"/login"}>
-          <p className=" text-[14px]/[20px] hover:underline cursor-pointer">
-            Sign in / Guest{" "}
-          </p>
-        </Link>
-        <Link to={"Register"}>
-          <p className=" text-[14px]/[20px] hover:underline cursor-pointer">
-            Create Account
-          </p>
-        </Link>
+        {user ? (
+          <>
+            <p className="text-[14px]/[20px]">Hello, {user.username}</p>
+            <button
+              onClick={handleLogout}
+              className="text-[14px]/[20px] hover:underline cursor-pointer">
+              Log out
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to={"/login"}>
+              <p className="text-[14px]/[20px] hover:underline cursor-pointer">
+                Sign in / Guest
+              </p>
+            </Link>
+            <Link to={"/register"}>
+              <p className="text-[14px]/[20px] hover:underline cursor-pointer">
+                Create Account
+              </p>
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

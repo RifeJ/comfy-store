@@ -8,7 +8,6 @@ const Layout = () => {
       <Header />
       <NavLinks />
       <main>
-        {/* This is where your pages (Main, About, etc.) will appear */}
         <Outlet />
       </main>
     </>

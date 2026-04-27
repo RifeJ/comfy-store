@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, LucideShieldUser } from "lucide-react";
 import "../App.css";
 
 function NavLinks() {
   const [theme, setTheme] = useState(localStorage.getItem("theme"));
+  const [user, setUser] = useState(null);
 
   const changeTheme = () => {
     const newTheme = theme === "winter" ? "dracula" : "winter";
@@ -15,6 +16,26 @@ function NavLinks() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+
+    // Listen for logout events from other components
+    const handleStorageChange = () => {
+      const user = localStorage.getItem("user");
+      setUser(user ? JSON.parse(user) : null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <div className="bg-base-200">
@@ -51,6 +72,15 @@ function NavLinks() {
                 Cart
               </NavLink>
             </li>
+            {user && (
+              <li>
+                <NavLink
+                  to={"/checkout"}
+                  className="text-[14px]/[20px] py-2! px-4!">
+                  Checkout
+                </NavLink>
+              </li>
+            )}
           </ul>
         </div>
         <div className="flex items-center">
@@ -63,15 +93,14 @@ function NavLinks() {
             </button>
           </div>
 
-          {/* Иконка Корзины */}
           <div className="ml-4!">
             <Link to={"Cart"}>
               <svg
                 stroke="currentColor"
                 fill="currentColor"
-                strokeWidth="0" /* Исправлено */
+                strokeWidth="0"
                 viewBox="0 0 16 16"
-                className="h-6 w-6" /* Исправлено */
+                className="h-6 w-6"
                 height="1em"
                 width="1em"
                 xmlns="http://www.w3.org/2000/svg">
