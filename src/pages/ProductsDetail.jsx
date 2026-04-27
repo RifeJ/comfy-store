@@ -5,12 +5,13 @@ import { Link } from "react-router";
 import { ProductContex2 } from "../utils/ProductContex2";
 import LoadingSpiner from "../components/LoadingSpiner";
 import storeCart from "../utils/storeCart";
+import { toast } from "react-toastify";
 
 function ProductsDetail() {
   const { id } = useParams();
 
   const { data, loading } = ProductContex2(
-    `https://strapi-store-server.onrender.com/api/products/${id}`,
+    `http://localhost:5000/api/products/${id}`,
   );
 
   const [someState, setSomeState] = useState(null);
@@ -40,6 +41,8 @@ function ProductsDetail() {
 
     console.log("SENDING TO STORE:", cartProduct);
     addToCart(cartProduct);
+
+    toast.success("Item added to cart", { autoClose: 2000, draggable: true });
   };
 
   if (loading) {

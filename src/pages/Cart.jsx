@@ -1,13 +1,16 @@
 import React from "react";
 import storeCart from "../utils/storeCart";
 import { Link } from "react-router";
+import { toast } from "react-toastify";
 
 function Cart() {
   const cartItems = storeCart((state) => state.cartItems);
   const removeFromCart = storeCart((state) => state.removeFromCart);
+  const handleRemove = (id) => {
+    removeFromCart(id);
+    toast.error("Item removed");
+  };
   const editAmount = storeCart((state) => state.editAmount);
-
-  // 1. Calculations stay at the top
   const subtotal =
     cartItems?.reduce((acc, item) => acc + item.price * item.amount, 0) || 0;
   const shipping = 500;
@@ -30,9 +33,7 @@ function Cart() {
         <h1 className="text-3xl font-medium tracking-wider">Shopping Cart</h1>
       </div>
 
-      {/* 2. Main Grid Layout */}
       <div className="mt-8 grid gap-8 lg:grid-cols-12">
-        {/* LEFT COLUMN: The List of Items */}
         <div className="lg:col-span-8">
           {cartItems.map((item) => {
             const { title, price, company, image, color, amount, cartID } =
@@ -53,7 +54,7 @@ function Cart() {
                     {company}
                   </p>
                   <p className="mt-4 text-sm capitalize flex items-center gap-x-2">
-                    Color :{" "}
+                    Color :
                     <span
                       style={{ backgroundColor: color }}
                       className="w-6 h-6 rounded-full border"></span>
@@ -75,7 +76,7 @@ function Cart() {
                     ))}
                   </select>
                   <button
-                    onClick={() => removeFromCart(cartID)}
+                    onClick={() => handleRemove(item.cartID)}
                     className="mt-2 block link link-primary link-hover text-sm text-error">
                     remove
                   </button>
@@ -89,7 +90,6 @@ function Cart() {
           })}
         </div>
 
-        {/* RIGHT COLUMN: The Summary (NOW OUTSIDE THE MAP) */}
         <div className="lg:col-span-4 lg:pl-4">
           <div className="card bg-base-200">
             <div className="card-body">
@@ -118,7 +118,7 @@ function Cart() {
             </div>
           </div>
           <Link
-            to="/LogIn"
+            to="/login"
             className="btn btn-primary btn-block mt-8 uppercase">
             please log in
           </Link>

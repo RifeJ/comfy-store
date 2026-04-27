@@ -8,24 +8,61 @@ import ProductsDetail from "./pages/ProductsDetail";
 import Cart from "./pages/Cart";
 import Layout from "./components/Layout"; // Import the layout
 import Login from "./pages/Login";
+import SignIn from "./pages/SignIn";
+import Checkout from "./pages/Checkout";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminFab from "./components/AdminFab";
+import AdminDashboard from "./pages/AdminDashboard";
 import "./App.css";
 
 function App() {
+  const toastTheme =
+    localStorage.getItem("theme") === "dracula" ? "dark" : "light";
   return (
-    <Routes>
-      {/* 1. Pages WITH Header and Nav */}
-      <Route element={<Layout />}>
-        <Route path="/" element={<Main />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/products/:id" element={<ProductsDetail />} />
-        <Route path="/cart" element={<Cart />} />
-      </Route>
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        theme={toastTheme}
+        pauseOnHover={false}
+      />
+      <AdminFab />
+      <Routes>
+        {/* 1. Pages WITH Header and Nav */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<Main />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductsDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-      {/* 2. Page WITHOUT Header and Nav */}
-      <Route path="*" element={<NotFound />} />
-      <Route path="/login" element={<Login />} />
-    </Routes>
+        {/* 2. Page WITHOUT Header and Nav */}
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<SignIn />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 

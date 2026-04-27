@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { data, Link } from "react-router";
 import carouselImg1 from "../assets/hero1-deae5a1f.webp";
 import carouselImg2 from "../assets/hero2-2271e3ad.webp";
 import carouselImg3 from "../assets/hero3-a83f0357.webp";
@@ -9,9 +9,10 @@ import LoadingSpiner from "../components/LoadingSpiner";
 function MainPage() {
   const [loading, setLoading] = useState(true);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("https://strapi-store-server.onrender.com/api/products?featured=true")
+    fetch("http://localhost:5000/api/products?featured=true")
       .then((res) => res.json())
       .then((data) => {
         setFeaturedProducts(data.data);
@@ -19,12 +20,21 @@ function MainPage() {
       })
       .catch((err) => {
         console.log(err);
+        setError(true);
         setLoading(false);
       });
   }, []);
 
   if (loading) {
     return <LoadingSpiner />;
+  }
+
+  if (error) {
+    return (
+      <p className="w-screen mt-70 flex justify-center items-center text-5xl font-black">
+        Server issues [500]
+      </p>
+    );
   }
 
   return (

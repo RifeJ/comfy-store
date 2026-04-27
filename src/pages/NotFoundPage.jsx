@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 
 function NotFoundPage() {
   return (
