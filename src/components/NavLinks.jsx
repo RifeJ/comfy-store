@@ -4,7 +4,12 @@ import { Moon, Sun, LucideShieldUser } from "lucide-react";
 import "../App.css";
 
 function NavLinks() {
-  const [theme, setTheme] = useState(localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(() => {
+    const storedTheme = localStorage.getItem("theme");
+    return storedTheme === "winter" || storedTheme === "dracula"
+      ? storedTheme
+      : "winter";
+  });
   const [user, setUser] = useState(null);
 
   const changeTheme = () => {
@@ -13,8 +18,9 @@ function NavLinks() {
   };
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    console.log("Storage and DOM updated to:", theme);
   }, [theme]);
 
   useEffect(() => {

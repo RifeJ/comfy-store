@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router"; // Добавил useNavigate для редиректа
-import { useForm } from "react-hook-form"; // Подключаем хук-формы
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 function Login() {

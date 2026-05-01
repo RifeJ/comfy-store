@@ -51,7 +51,6 @@ function SignIN() {
         toast.success("Account created! Please login.");
         setTimeout(() => navigate("/login"), 1000);
       } else if (response.status === 429) {
-        // Rate limiting - too many attempts
         const unbannedAt = result.unbannedAt
           ? new Date(result.unbannedAt).toLocaleString()
           : "later";
@@ -82,7 +81,7 @@ function SignIN() {
               <span className="label-text capitalize">Username</span>
             </label>
             <input
-              {...register("username")} // Просто название, правила берем из Zod
+              {...register("username")}
               type="text"
               className={`input input-bordered ${errors.username ? "input-error" : ""}`}
             />
