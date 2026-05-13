@@ -39,7 +39,7 @@ function ProductsDetail() {
       color: color,
     };
 
-    console.log("SENDING TO STORE:", cartProduct);
+    // console.log("SENDING TO STORE:", cartProduct);
     addToCart(cartProduct);
 
     toast.success("Item added to cart", { autoClose: 2000, draggable: true });
