@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router";
 import { Moon, Sun, LucideShieldUser } from "lucide-react";
 import "../App.css";
+import { motion, useAnimation } from "framer-motion";
 
 function NavLinks() {
   const [theme, setTheme] = useState(() => {
@@ -20,7 +21,6 @@ function NavLinks() {
   useEffect(() => {
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
-    console.log("Storage and DOM updated to:", theme);
   }, [theme]);
 
   useEffect(() => {
@@ -89,17 +89,17 @@ function NavLinks() {
             )}
           </ul>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center justify-center">
           <div>
             <button
-              className="cursor-pointer"
+              className="cursor-pointer btn-animation"
               aria-label="Toggle theme"
               onClick={changeTheme}>
               {theme === "winter" ? <Moon size={20} /> : <Sun size={20} />}
             </button>
           </div>
 
-          <div className="ml-4!">
+          <div className="ml-4">
             <Link to={"Cart"}>
               <svg
                 stroke="currentColor"

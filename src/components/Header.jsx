@@ -21,7 +21,7 @@ function Header() {
     localStorage.removeItem("user");
     localStorage.removeItem("jwt");
     setUser(null);
-    window.location.reload(); // Refresh the page to update the UI
+    window.location.reload();
   };
 
   return (
@@ -32,7 +32,7 @@ function Header() {
             <p className="text-[14px]/[20px]">Hello, {user.username}</p>
             <button
               onClick={handleLogout}
-              className="text-[14px]/[20px] hover:underline cursor-pointer">
+              className="text-[13px]/[20px] text-primary font-medium hover:underline cursor-pointer border border-primary rounded-[10px] py-0.5 px-2 hover:bg-primary hover:text-neutral">
               Log out
             </button>
           </>
