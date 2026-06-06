@@ -21,7 +21,7 @@ function Header() {
     localStorage.removeItem("user");
     localStorage.removeItem("jwt");
     setUser(null);
-    window.location.reload(); // Refresh the page to update the UI
+    window.location.reload(); 
   };
 
   return (

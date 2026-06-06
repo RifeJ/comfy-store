@@ -4,12 +4,13 @@ import { Moon, Sun, LucideShieldUser } from "lucide-react";
 import "../App.css";
 
 function NavLinks() {
-  const [theme, setTheme] = useState(localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || "winter",
+  );
   const [user, setUser] = useState(null);
 
   const changeTheme = () => {
-    const newTheme = theme === "winter" ? "dracula" : "winter";
-    setTheme(newTheme);
+    setTheme((prev) => (prev === "winter" ? "dracula" : "winter"));
   };
 
   useEffect(() => {
@@ -27,7 +28,6 @@ function NavLinks() {
       }
     }
 
-    // Listen for logout events from other components
     const handleStorageChange = () => {
       const user = localStorage.getItem("user");
       setUser(user ? JSON.parse(user) : null);

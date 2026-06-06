@@ -6,7 +6,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import ProductsDetail from "./pages/ProductsDetail";
 import Cart from "./pages/Cart";
-import Layout from "./components/Layout"; // Import the layout
+import Layout from "./components/Layout"; 
 import Login from "./pages/Login";
 import SignIn from "./pages/SignIn";
 import Checkout from "./pages/Checkout";
@@ -35,7 +35,7 @@ function App() {
           <Route path="/" element={<Main />} />
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductsDetail />} />
+          <Route path="/products/:_id" element={<ProductsDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route
             path="/checkout"

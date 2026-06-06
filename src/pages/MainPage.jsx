@@ -1,41 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { data, Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { fetchFeaturedProducts } from "../services/axios";
+import { Link } from "react-router";
+import LoadingSpiner from "../components/LoadingSpiner";
+import ServerErrorBlock from "../components/ServerErrorBlock";
 import carouselImg1 from "../assets/hero1-deae5a1f.webp";
 import carouselImg2 from "../assets/hero2-2271e3ad.webp";
 import carouselImg3 from "../assets/hero3-a83f0357.webp";
 import carouselImg4 from "../assets/hero4-4b9de90e.webp";
-import LoadingSpiner from "../components/LoadingSpiner";
 
 function MainPage() {
-  const [loading, setLoading] = useState(true);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [error, setError] = useState(null);
+  const {
+    data: products = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["FeaturedProducts"],
+    queryFn: fetchFeaturedProducts,
+  });
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/products?featured=true")
-      .then((res) => res.json())
-      .then((data) => {
-        setFeaturedProducts(data.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return <LoadingSpiner />;
-  }
-
-  if (error) {
-    return (
-      <p className="w-screen mt-70 flex justify-center items-center text-5xl font-black">
-        Server issues [500]
-      </p>
-    );
-  }
+  if (isLoading) return <LoadingSpiner />;
+  if (error) return <ServerErrorBlock />;
 
   return (
     <section className="py-20! px-8! mx-auto! max-w-6xl">
@@ -49,11 +34,11 @@ function MainPage() {
             From elegant sofas to handcrafted tables, we offer quality pieces
             that combine style, durability, and unmatched comfort.
           </p>
-          <button className="bg-primary hover:brightness-88 duration-300 ease-in border-[0.8px] border-solid border-primary rounded-lg  cursor-pointer py-2! px-4! mt-10! nav-links-logo">
-            <Link to={"Products"}>
+          <Link to={"Products"}>
+            <button className="bg-primary hover:brightness-88 duration-300 ease-in border-[0.8px] border-solid border-primary rounded-lg  cursor-pointer py-2! px-4! mt-10! nav-links-logo">
               <p className="uppercase text-white">our products</p>
-            </Link>
-          </button>
+            </button>
+          </Link>
         </div>
         <div className="carousel carousel-center bg-neutral rounded-box max-w-full space-x-4 p-4 h-112">
           <div className="carousel-item flex-none">
@@ -96,9 +81,8 @@ function MainPage() {
           </h1>
         </div>
         <div className="pt-12! grid grid-cols-3 gap-4">
-          {featuredProducts.map((product) => {
-            const { id } = product;
-            const { title, price, image } = product.attributes;
+          {products.map((product) => {
+            const { _id, title, price, image } = product;
 
             const dollarsAmount = new Intl.NumberFormat("en-US", {
               style: "currency",
@@ -107,8 +91,8 @@ function MainPage() {
 
             return (
               <Link
-                key={id}
-                to={`/Products/${id}`}
+                key={_id}
+                to={`/Products/${_id}`}
                 className="rounded-2xl shadow-xl hover:shadow-2xl transition duration-300">
                 <figure className="px-4 pt-4">
                   <img

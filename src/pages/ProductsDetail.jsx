@@ -2,19 +2,20 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router";
 import { useState, useContext } from "react";
 import { Link } from "react-router";
-import { ProductContex2 } from "../utils/ProductContex2";
+import { fetchSingleProduct } from "../services/axios";
 import LoadingSpiner from "../components/LoadingSpiner";
 import storeCart from "../utils/storeCart";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
 
 function ProductsDetail() {
-  const { id } = useParams();
+  const { _id } = useParams();
 
-  const { data, loading } = ProductContex2(
-    `http://localhost:5000/api/products/${id}`,
-  );
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["SingleProduct"],
+    queryFn: () => fetchSingleProduct(_id),
+  });
 
-  const [someState, setSomeState] = useState(null);
   const [amount, setAmount] = useState(1);
 
   const [color, setColor] = useState("");
@@ -29,12 +30,12 @@ function ProductsDetail() {
 
   const handleAddToCart = () => {
     const cartProduct = {
-      cartID: data.id + color,
-      productID: data.id,
-      image: data.attributes.image,
-      title: data.attributes.title,
-      price: data.attributes.price,
-      company: data.attributes.company,
+      cartID: data._id + color,
+      productID: data._id,
+      image: data.image,
+      title: data.title,
+      price: data.price,
+      company: data.company,
       amount: amount,
       color: color,
     };
@@ -45,7 +46,7 @@ function ProductsDetail() {
     toast.success("Item added to cart", { autoClose: 2000, draggable: true });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpiner />;
   }
 
@@ -57,8 +58,7 @@ function ProductsDetail() {
     );
   }
 
-  const { attributes } = data;
-  const { title, price, image, company, description, colors } = attributes;
+  const { title, price, image, company, description, colors } = data;
 
   return (
     <div className="py-20! px-8! mx-auto! max-w-6xl">
@@ -91,7 +91,7 @@ function ProductsDetail() {
           <div className="mt-6">
             <p className="font-medium tracking-wider capitalize">colors</p>
             <div className="my-2">
-              {data.attributes.colors.map((c) => {
+              {data.colors?.map((c) => {
                 return (
                   <button
                     key={c}

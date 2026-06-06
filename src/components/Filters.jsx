@@ -46,7 +46,7 @@ const Filters = ({
         </select>
       </div>
 
-      {/* 3. КОМПАНИИ (Новое!) */}
+      {/* 3. КОМПАНИИ */}
       <div className="form-control">
         <label className="label-text capitalize">select company</label>
         <select
@@ -58,7 +58,7 @@ const Filters = ({
         </select>
       </div>
 
-      {/* 4. СОРТИРОВКА (Новое!) */}
+      {/* 4. СОРТИРОВКА */}
       <div className="form-control">
         <label className="label-text capitalize">sort by</label>
         <select
@@ -71,7 +71,7 @@ const Filters = ({
         </select>
       </div>
 
-      {/* 5. ЦЕНА (Рендж-инпут) */}
+      {/* 5. ЦЕНА */}
       <div className="form-control">
         <label className="label-text capitalize">select price</label>
         <input

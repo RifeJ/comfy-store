@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ProductContex2 } from "../utils/ProductContex2";
+import { useQuery } from "@tanstack/react-query";
+import { fetchFilterProducts } from "../services/axios";
 import LoadingSpiner from "../components/LoadingSpiner";
 import Filters from "../components/Filters";
 import ProductCard from "../components/ProductCard";
-import PaginationContainer from "../components/PaginationContainer";
 
 const initialFilters = {
   search: "",
@@ -12,30 +12,30 @@ const initialFilters = {
   order: "a-z",
   price: 100000,
   shipping: "",
-  page: "1",
 };
 
 function Products() {
   const [appliedFilters, setAppliedFilters] = useState(initialFilters);
 
-  // Генерируем URL только для запроса
-  const queryParams = new URLSearchParams(appliedFilters).toString();
-  const url = `http://localhost:5000/api/products?${queryParams}`;
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["FilterProducts", appliedFilters],
+    queryFn: () => fetchFilterProducts(appliedFilters),
+  });
 
-  // Твой кастомный хук сам сделает fetch при изменении URL
-  const { data, loading, meta } = ProductContex2(url);
+  if (isLoading) return <LoadingSpiner />;
+  if (error) return <ServiceWorkerRegistration />;
+
+  const products = data?.data;
+  const meta = data?.meta;
+  console.log(data);
 
   const fetchProducts = (dataFromForm) => {
-    // Превращаем boolean из чекбокса в "on" для твоего бэкенда
     const formattedFilters = {
       ...dataFromForm,
       shipping: dataFromForm.shipping ? "on" : "",
-      page: "1",
     };
     setAppliedFilters(formattedFilters);
   };
-
-  if (loading) return <LoadingSpiner />;
 
   return (
     <section className="py-20 px-8 mx-auto max-w-6xl">
@@ -48,19 +48,14 @@ function Products() {
       />
 
       <div className="pt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {data && data.length > 0 ? (
-          data.map((product) => (
-            <ProductCard key={product.id} product={product} />
+        {products && products.length > 0 ? (
+          products.map((product) => (
+            <ProductCard key={product._id} product={product} />
           ))
         ) : (
           <h2 className="text-2xl mt-16">No products matched your search...</h2>
         )}
       </div>
-      {/* <PaginationContainer
-        meta={meta}
-        filters={filters}
-        setFilters={setFilters}
-      /> */}
     </section>
   );
 }

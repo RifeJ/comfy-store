@@ -53,35 +53,32 @@ const AdminDashboard = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
 
-    // Собираем данные в формате Strapi
     const payload = {
-      data: {
-        ...newProduct,
-        price: Number(newProduct.price), // Важно: число
-        featured: Boolean(newProduct.featured),
-        shipping: Boolean(newProduct.shipping),
-        // Если colors — это строка из инпута (напр. "#fff, #000"), превращаем в массив
-        colors:
-          typeof newProduct.colors === "string"
-            ? newProduct.colors.split(",").map((c) => c.trim())
-            : newProduct.colors,
-      },
+      ...newProduct,
+      price: Number(newProduct.price),
+      featured: Boolean(newProduct.featured),
+      shipping: Boolean(newProduct.shipping),
+      colors:
+        typeof newProduct.colors === "string"
+          ? newProduct.colors.split(",").map((c) => c.trim())
+          : newProduct.colors,
     };
 
     try {
       const response = await fetch("http://localhost:5000/api/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "admin-key": "werd",
+        },
         body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        // ПРИЕМ ДАННЫХ: добавляем результат в стейт
         setItems((prevItems) => [...prevItems, result.data]);
 
-        // Очистка формы
         setNewProduct({
           title: "",
           price: "",
@@ -94,35 +91,34 @@ const AdminDashboard = () => {
           colors: [],
         });
 
-        console.log("SUCCESS: UNIT_SYNCED_WITH_GRID");
         toast.success("SUCCESS: UNIT_SYNCED_WITH_GRID");
       } else {
-        console.error("REJECTED:", result.error);
+        toast.error(`REJECTED:${result.error}`);
       }
     } catch (err) {
-      console.error("CONNECTION_LOST:", err);
+      toast.error(`CONNECTION_LOST:${err}`);
+      console.error(err);
     }
   };
 
   const handleTerminate = async (id) => {
     try {
-      // 1. Отправляем запрос на удаление в API
       const response = await fetch(`http://localhost:5000/api/products/${id}`, {
         method: "DELETE",
+        headers: {
+          "admin-key": "werd",
+        },
       });
 
       if (response.ok) {
-        // 2. Если в базе удалено успешно, запускаем анимацию
         setTerminatingId(id);
-        // 3. Ждем завершения анимации (600ms) и убираем из стейта
         setTimeout(() => {
-          setItems((prev) => prev.filter((item) => item.id !== id));
+          setItems((prev) => prev.filter((item) => item._id !== id));
           setTerminatingId(null);
         }, 600);
 
         console.log(`UNIT_${id}: TERMINATED_SUCCESSFULLY`);
       } else {
-        // Если сервер выдал ошибку (например, 403 или 500)
         alert("ACCESS_DENIED: DATABASE_REJECTED_COMMAND");
       }
     } catch (error) {
@@ -235,7 +231,8 @@ const AdminDashboard = () => {
                 {/* Основное */}
                 <input
                   placeholder="TITLE"
-                  className="admin-input" // твой стиль из CSS
+                  className="admin-input"
+                  value={newProduct.title}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, title: e.target.value })
                   }
@@ -244,6 +241,7 @@ const AdminDashboard = () => {
                   placeholder="PRICE"
                   type="number"
                   className="admin-input text-[#FF69B4]"
+                  value={newProduct.price}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, price: e.target.value })
                   }
@@ -253,6 +251,7 @@ const AdminDashboard = () => {
                 <input
                   placeholder="CATEGORY"
                   className="admin-input"
+                  value={newProduct.category}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
@@ -260,6 +259,7 @@ const AdminDashboard = () => {
                 <input
                   placeholder="COMPANY"
                   className="admin-input"
+                  value={newProduct.company}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, company: e.target.value })
                   }
@@ -267,6 +267,7 @@ const AdminDashboard = () => {
                 <input
                   placeholder="IMAGE_URL"
                   className="admin-input w-full"
+                  value={newProduct.image}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, image: e.target.value })
                   }
@@ -275,6 +276,7 @@ const AdminDashboard = () => {
                   type="text"
                   placeholder="COLORS (e.g. #ff0000, #000000)"
                   className="admin-input"
+                  value={newProduct.colors}
                   onChange={(e) => {
                     const colorsArray = e.target.value
                       .split(",")
@@ -289,6 +291,7 @@ const AdminDashboard = () => {
                 <label className="flex items-center gap-2 cursor-pointer hover:text-[#FF69B4]">
                   <input
                     type="checkbox"
+                    value={newProduct.featured}
                     onChange={(e) =>
                       setNewProduct({
                         ...newProduct,
@@ -301,6 +304,7 @@ const AdminDashboard = () => {
                 <label className="flex items-center gap-2 cursor-pointer hover:text-[#FF69B4]">
                   <input
                     type="checkbox"
+                    value={newProduct.shipping}
                     onChange={(e) =>
                       setNewProduct({
                         ...newProduct,
@@ -332,24 +336,24 @@ const AdminDashboard = () => {
             <tbody>
               {items.map((item) => (
                 <tr
-                  key={item.id}
+                  key={item._id}
                   className={`border-b border-slate-900 transition-all ${
-                    terminatingId === item.id
+                    terminatingId === item._id
                       ? "animate-terminate"
                       : "hover:bg-[#FF69B4]/5"
                   }`}>
                   <td className="py-4 px-4 font-mono text-slate-500 text-xs">
-                    #{item.id}
+                    #{item._id.slice(-6)}
                   </td>
                   <td className="py-4 px-4 font-bold text-white uppercase">
-                    {item.attributes?.title || item.title || "Unknown_Unit"}
+                    {item.title || "UNKNOWN_UNIT"}
                   </td>
                   <td className="py-4 px-4 text-[#FF69B4] font-mono">
-                    ${item.attributes?.price || item.price}
+                    ${item.price}
                   </td>
                   <td className="py-4 px-4 text-right">
                     <button
-                      onClick={() => handleTerminate(item.id)}
+                      onClick={() => handleTerminate(item._id)}
                       className="text-red-500 hover:text-white hover:bg-red-600 px-3 py-1 text-[10px] border border-red-900 transition-all font-bold">
                       [ TERMINATE ]
                     </button>
