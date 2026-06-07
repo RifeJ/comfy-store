@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router";
-import { Moon, Sun, LucideShieldUser } from "lucide-react";
+import { Moon, Sun, Menu, X } from "lucide-react";
 import "../App.css";
 
 function NavLinks() {
@@ -8,6 +8,7 @@ function NavLinks() {
     () => localStorage.getItem("theme") || "winter",
   );
   const [user, setUser] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const changeTheme = () => {
     setTheme((prev) => (prev === "winter" ? "dracula" : "winter"));
@@ -41,15 +42,20 @@ function NavLinks() {
     <div className="bg-base-200">
       <div className="mx-auto! max-w-6xl px-8! py-2! flex justify-between items-center min-h-16 w-full">
         <div
-          className={`bg-primary hover:brightness-88  duration-300 ease-in border-[0.8px] border-solid border-primary rounded-lg px-4! nav-links-logo cursor-pointer`}>
-          <Link to={"/"}>
+          className={`bg-primary hover:brightness-88  duration-300 ease-in border-[0.8px] border-solid border-primary rounded-lg px-4! nav-links-logo cursor-pointer max-lg:hidden`}>
+          <Link to={"/"} className="">
             <p className="uppercase text-[#dbe1ff] text-3xl leading-[46.4px] ">
               C
             </p>
           </Link>
         </div>
+        <button
+          className="lg:hidden p-2"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
         <div>
-          <ul className="flex">
+          <ul className="hidden lg:flex">
             <li>
               <NavLink to={"/"} className="text-[14px]/[20px] py-2! px-4!">
                 Home
@@ -109,6 +115,34 @@ function NavLinks() {
             </Link>
           </div>
         </div>
+        {isMenuOpen && (
+          <div className="lg:hidden bg-base-200 border-t border-base-300 p-4 flex flex-col gap-2">
+            <NavLink
+              to={"/"}
+              onClick={() => setIsMenuOpen(false)}
+              className="block p-2">
+              Home
+            </NavLink>
+            <NavLink
+              to={"/About"}
+              onClick={() => setIsMenuOpen(false)}
+              className="block p-2">
+              About
+            </NavLink>
+            <NavLink
+              to={"/Products"}
+              onClick={() => setIsMenuOpen(false)}
+              className="block p-2">
+              Products
+            </NavLink>
+            <NavLink
+              to={"/Cart"}
+              onClick={() => setIsMenuOpen(false)}
+              className="block p-2">
+              Cart
+            </NavLink>
+          </div>
+        )}
       </div>
     </div>
   );

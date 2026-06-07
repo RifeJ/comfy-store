@@ -24,7 +24,7 @@ function MainPage() {
 
   return (
     <section className="py-20! px-8! mx-auto! max-w-6xl">
-      <div className="grid grid-cols-2 gap-24 items-center">
+      <div className="grid grid-cols-2 gap-24 items-center max-lg:grid-cols-1">
         <div>
           <h1 className="max-w-2xl text-6xl font-bold tracking-tight">
             We are changing the way people shop
@@ -40,7 +40,7 @@ function MainPage() {
             </button>
           </Link>
         </div>
-        <div className="carousel carousel-center bg-neutral rounded-box max-w-full space-x-4 p-4 h-112">
+        <div className="carousel carousel-center bg-neutral rounded-box max-w-full space-x-4 p-4 h-112 max-lg:hidden">
           <div className="carousel-item flex-none">
             <img
               src={carouselImg1}
@@ -80,7 +80,7 @@ function MainPage() {
             featured products
           </h1>
         </div>
-        <div className="pt-12! grid grid-cols-3 gap-4">
+        <div className="pt-12! grid grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1 gap-4">
           {products.map((product) => {
             const { _id, title, price, image } = product;
 

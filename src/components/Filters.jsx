@@ -85,7 +85,7 @@ const Filters = ({
       </div>
 
       {/* 6. ДОСТАВКА */}
-      <div className="form-control items-center justify-between">
+      <div className="form-control flex flex-col gap-2 items-center justify-between">
         <label className="label-text capitalize cursor-pointer">
           free shipping
         </label>

@@ -7,9 +7,11 @@ import {
   HiOutlineArrowLeft,
 } from "react-icons/hi2";
 
-import { ProductContex2 } from "../utils/ProductContex2";
-
 import { toast } from "react-toastify";
+
+import { io } from "socket.io-client";
+
+const socket = io("https://comfystorebackend-production.up.railway.app");
 
 const Typewriter = ({ text, speed = 100 }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -37,18 +39,47 @@ const Typewriter = ({ text, speed = 100 }) => {
 };
 
 const AdminDashboard = () => {
-  const { data, loading } = ProductContex2(
-    "http://localhost:5000/api/products",
-  );
-
   const [items, setItems] = useState([]);
   const [terminatingId, setTerminatingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(
+        "https://comfystorebackend-production.up.railway.app/products",
+      );
+      const result = await response.json();
+      setItems(result.data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch:", err);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (data) setItems(data);
-  }, [data]);
+    fetchItems();
+  }, []);
 
-  const [newProduct, setNewProduct] = useState({ title: "", price: "" });
+  useEffect(() => {
+    socket.on("DATABASE_SYNC_EVENT", () => {
+      console.log("SYNC_SIGNAL_RECEIVED: REFRESHING_GRID");
+      fetchItems();
+    });
+
+    return () => socket.off("DATABASE_SYNC_EVENT");
+  }, []);
+
+  const [newProduct, setNewProduct] = useState({
+    title: "",
+    price: "",
+    category: "",
+    company: "",
+    image: "",
+    colors: "",
+    featured: false,
+    shipping: false,
+  });
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -64,15 +95,20 @@ const AdminDashboard = () => {
           : newProduct.colors,
     };
 
+    const key = import.meta.env.VITE_ADMIN_KEY;
+
     try {
-      const response = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "admin-key": "werd",
+      const response = await fetch(
+        "https://comfystorebackend-production.up.railway.app/products",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "admin-key": `${key}`,
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const result = await response.json();
 
@@ -102,13 +138,20 @@ const AdminDashboard = () => {
   };
 
   const handleTerminate = async (id) => {
+    const isConfirmed = window.confirm(
+      "CRITICAL_ALERT: Are you sure you want to terminate this unit? This operation is permanent and cannot be undone.",
+    );
+    if (!isConfirmed === true) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "DELETE",
-        headers: {
-          "admin-key": "werd",
+      const response = await fetch(
+        `https://comfystorebackend-production.up.railway.app/products/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "admin-key": "werd",
+          },
         },
-      });
+      );
 
       if (response.ok) {
         setTerminatingId(id);
@@ -136,10 +179,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="relative flex min-h-screen bg-[#0a0a0a] text-slate-300 font-mono overflow-hidden">
-      {/* 1. CRT SCANLINE EFFECT (Overlay) */}
       <div className="pointer-events-none absolute inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-size-[100%_4px,3px_100%] opacity-50"></div>
 
-      {/* 2. SIDEBAR */}
       <aside className="w-64 border-r border-[#FF69B4]/20 bg-[#0f0f0f] p-6 flex flex-col z-10">
         <div className="mb-10 text-[#FF69B4] font-bold text-xl tracking-tighter border-b border-[#FF69B4]/20 pb-4">
           CORE_OS v1.0
@@ -157,7 +198,6 @@ const AdminDashboard = () => {
           </button>
         </nav>
 
-        {/* LOGOUT / EXIT */}
         <Link
           to="/"
           className="flex items-center gap-2 text-xs text-slate-500 hover:text-white transition-colors mt-auto pt-4">
@@ -165,14 +205,11 @@ const AdminDashboard = () => {
         </Link>
       </aside>
 
-      {/* 3. MAIN CONTENT */}
       <main className="flex-1 p-10 overflow-y-auto z-10 relative">
-        {/* SYSTEM HEADER */}
         <header className="mb-10">
           <Typewriter text="SYSTEM_OVERVIEW_v2.0" speed={70} />
           <div className="h-1 w-20 bg-[#FF69B4] mt-2 shadow-[0_0_10px_#FF69B4]"></div>
 
-          {/* STATS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="border border-[#FF69B4]/30 bg-[#FF69B4]/5 p-4 rounded-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-[#FF69B4]"></div>
@@ -203,7 +240,6 @@ const AdminDashboard = () => {
           </div>
         </header>
 
-        {/* LIVE GRAPH (Visualizer) */}
         <div className="mb-6 flex items-end gap-1 h-10 px-2 border-b border-slate-800">
           {[...Array(30)].map((_, i) => (
             <div
@@ -216,7 +252,6 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* INVENTORY TABLE */}
         <div className="bg-[#111]/80 border border-slate-800 p-6 rounded-lg backdrop-blur-sm">
           <h2 className="text-[#FF69B4] font-bold mb-6 flex items-center gap-2 uppercase tracking-tighter">
             <span className="w-2 h-2 bg-[#FF69B4] rounded-full animate-ping"></span>
@@ -227,8 +262,7 @@ const AdminDashboard = () => {
               &gt; INITIALIZE_NEW_UNIT
             </h3>
             <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Основное */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <input
                   placeholder="TITLE"
                   className="admin-input"
@@ -247,7 +281,6 @@ const AdminDashboard = () => {
                   }
                 />
 
-                {/* Категория и Бренд */}
                 <input
                   placeholder="CATEGORY"
                   className="admin-input"
@@ -286,7 +319,6 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Переключатели (Checkbox) */}
               <div className="flex gap-10 text-[10px] tracking-widest text-slate-500">
                 <label className="flex items-center gap-2 cursor-pointer hover:text-[#FF69B4]">
                   <input
@@ -321,47 +353,49 @@ const AdminDashboard = () => {
                 className="w-full py-4 border border-[#FF69B4] text-[#FF69B4] hover:bg-[#FF69B4] hover:text-black transition-all uppercase font-bold">
                 EXECUTE_DATA_INJECTION
               </button>
+              <button
+                onClick={fetchItems}
+                className="text-xs text-[#FF69B4] border border-[#FF69B4] p-1 hover:bg-[#FF69B4] hover:text-black">
+                [ SYNC_WITH_ATLAS ]
+              </button>
             </form>
           </div>
 
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-500 text-[10px] tracking-widest uppercase">
-                <th className="py-3 px-4">UID</th>
-                <th className="py-3 px-4">Model_Name</th>
-                <th className="py-3 px-4">Price_Credits</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="w-full bg-[#111]/80 border border-slate-800 rounded-lg mt-6 text-sm">
+            {/* Шапка таблицы */}
+            <div className="grid grid-cols-[15%_45%_20%_20%] border-b border-slate-800 text-slate-500 text-[10px] tracking-widest uppercase bg-black/40 py-4 px-6">
+              <div>UID</div>
+              <div>Model_Name</div>
+              <div>Price_Credits</div>
+              <div className="text-right">Action</div>
+            </div>
+
+            {/* Строки с данными */}
+            <div className="divide-y divide-slate-950">
               {items.map((item) => (
-                <tr
+                <div
                   key={item._id}
-                  className={`border-b border-slate-900 transition-all ${
-                    terminatingId === item._id
-                      ? "animate-terminate"
-                      : "hover:bg-[#FF69B4]/5"
-                  }`}>
-                  <td className="py-4 px-4 font-mono text-slate-500 text-xs">
+                  className="grid grid-cols-4 items-center py-4 px-6 hover:bg-[#FF69B4]/5 transition-all">
+                  <div className="font-mono text-slate-500 truncate">
                     #{item._id.slice(-6)}
-                  </td>
-                  <td className="py-4 px-4 font-bold text-white uppercase">
+                  </div>
+                  <div className="font-bold text-white uppercase tracking-wide truncate">
                     {item.title || "UNKNOWN_UNIT"}
-                  </td>
-                  <td className="py-4 px-4 text-[#FF69B4] font-mono">
+                  </div>
+                  <div className="text-[#FF69B4] font-mono font-semibold">
                     ${item.price}
-                  </td>
-                  <td className="py-4 px-4 text-right">
+                  </div>
+                  <div className="text-right">
                     <button
                       onClick={() => handleTerminate(item._id)}
-                      className="text-red-500 hover:text-white hover:bg-red-600 px-3 py-1 text-[10px] border border-red-900 transition-all font-bold">
+                      className="text-red-500 hover:text-white hover:bg-red-600/80 px-3 py-1.5 text-[10px] border border-red-900 transition-all font-mono tracking-wider font-bold rounded-sm cursor-pointer inline-block">
                       [ TERMINATE ]
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </main>
     </div>

@@ -31,7 +31,7 @@ function SignIN() {
   const onSubmit = async (data) => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/local/register",
+        "https://comfystorebackend-production.up.railway.app/auth/local/register",
         {
           method: "POST",
           headers: {
