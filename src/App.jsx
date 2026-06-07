@@ -6,7 +6,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import ProductsDetail from "./pages/ProductsDetail";
 import Cart from "./pages/Cart";
-import Layout from "./components/Layout"; 
+import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import SignIn from "./pages/SignIn";
 import Checkout from "./pages/Checkout";
@@ -18,6 +18,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import "./App.css";
 
 function App() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userRole = user ? user.role : "guest";
   const toastTheme =
     localStorage.getItem("theme") === "dracula" ? "dark" : "light";
   return (
@@ -28,7 +30,7 @@ function App() {
         theme={toastTheme}
         pauseOnHover={false}
       />
-      <AdminFab />
+      {userRole === "admin" ? <AdminFab /> : ""}
       <Routes>
         {/* 1. Pages WITH Header and Nav */}
         <Route element={<Layout />}>

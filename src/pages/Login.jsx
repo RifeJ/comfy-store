@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router"; // Добавил useNavigate для редиректа
-import { useForm } from "react-hook-form"; // Подключаем хук-формы
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 function Login() {
@@ -32,7 +32,7 @@ function Login() {
 
       if (response.ok) {
         localStorage.setItem("user", JSON.stringify(result.user));
-        localStorage.setItem("jwt", result.jwt);
+        localStorage.setItem("token", result.jwt);
 
         toast.success("You successfully logged in");
         navigate("/");
