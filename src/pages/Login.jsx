@@ -16,7 +16,7 @@ function Login() {
   const handleLogin = async (data) => {
     try {
       const response = await fetch(
-        "https://comfystorebackend-production.up.railway.app/auth/local",
+        "https://comfystorebackend-production.up.railway.app/api/auth/local",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

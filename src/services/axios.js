@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://comfystorebackend-production.up.railway.app",
+  baseURL: "https://comfystorebackend-production.up.railway.app/api",
 });
 
 export const fetchFeaturedProducts = async () => {

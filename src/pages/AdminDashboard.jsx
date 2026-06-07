@@ -46,7 +46,7 @@ const AdminDashboard = () => {
   const fetchItems = async () => {
     try {
       const response = await fetch(
-        "https://comfystorebackend-production.up.railway.app/products",
+        "https://comfystorebackend-production.up.railway.app/api/products",
       );
       const result = await response.json();
       setItems(result.data);
@@ -99,7 +99,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(
-        "https://comfystorebackend-production.up.railway.app/products",
+        "https://comfystorebackend-production.up.railway.app/api/products",
         {
           method: "POST",
           headers: {
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
     if (!isConfirmed === true) return;
     try {
       const response = await fetch(
-        `https://comfystorebackend-production.up.railway.app/products/${id}`,
+        `https://comfystorebackend-production.up.railway.app/api/products/${id}`,
         {
           method: "DELETE",
           headers: {
