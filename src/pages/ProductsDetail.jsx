@@ -28,23 +28,7 @@ function ProductsDetail() {
 
   const addToCart = storeCart((CartItem) => CartItem.addToCart);
 
-  const handleAddToCart = () => {
-    const cartProduct = {
-      cartID: data._id + color,
-      productID: data._id,
-      image: data.image,
-      title: data.title,
-      price: data.price,
-      company: data.company,
-      amount: amount,
-      color: color,
-    };
-
-    console.log("SENDING TO STORE:", cartProduct);
-    addToCart(cartProduct);
-
-    toast.success("Item added to cart", { autoClose: 2000, draggable: true });
-  };
+z
 
   if (isLoading) {
     return <LoadingSpiner />;

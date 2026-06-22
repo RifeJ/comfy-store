@@ -7,13 +7,8 @@ const AdminFab = () => {
   const [isGlitching, setIsGlitching] = useState(false);
 
   const handleAdminEnter = () => {
-    // Играем звук помех / входа
-    const audio = new Audio("/sounds/glitch-sound.mp3");
-    audio.play();
-
     setIsGlitching(true);
 
-    // Ждем 1.5 сек и переходим
     setTimeout(() => {
       setIsGlitching(false);
       navigate("/admin");
@@ -22,7 +17,6 @@ const AdminFab = () => {
 
   return (
     <>
-      {/* ГЛИТЧ-ОВЕРЛЕЙ */}
       {isGlitching && (
         <div className="fixed inset-0 z-9999 glitch-screen flex flex-col items-center justify-center overflow-hidden">
           <div className="scanline"></div>
@@ -37,7 +31,6 @@ const AdminFab = () => {
         </div>
       )}
 
-      {/* САМА КНОПКА (видна только если не глитчит) */}
       {!isGlitching && (
         <div
           onClick={handleAdminEnter}
